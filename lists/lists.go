@@ -14,5 +14,4 @@ LIFO: last-in first-out
 
 Submit any issues or feature requests here: https://github.com/suicidejack/go-various/issues
 */
-
 package lists
