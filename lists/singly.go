@@ -132,11 +132,11 @@ func (s *Singly) Contains(comparison func(data interface{}) (exists bool)) bool 
 	return false
 }
 
-// Delete numItems data in the list based on the provided comparison function.  Moves from
-// the head of list to the tail.  If the
+// Delete numItems data in the list based on the provided comparison function.
+// Moves from the head of list to the tail.  If the
 // comparison function returns true for any item in the list then that item is
-// deleted.  Returns the number of items that were deleted.  If numItems is <= 0 then all
-// data in the list is scanned.
+// deleted.  Returns the number of items that were deleted.  If numItems is <= 0
+// then all data in the list is scanned.
 //
 // Runtime: O(n)
 func (s *Singly) Delete(numItems int, comparison func(data interface{}) (shouldDelete bool)) (numDeleted int) {
@@ -157,7 +157,7 @@ func (s *Singly) Delete(numItems int, comparison func(data interface{}) (shouldD
 			return
 		}
 	}
-	for pred, tmp := s.head, s.head.Next; tmp != nil; pred, tmp = tmp, tmp.Next {
+	for pred, tmp := s.head, s.head.Next; tmp != nil; tmp = tmp.Next {
 		if comparison(tmp.Data) {
 			pred.Next = tmp.Next
 			if pred.Next == nil {
@@ -168,6 +168,8 @@ func (s *Singly) Delete(numItems int, comparison func(data interface{}) (shouldD
 			if numItems == numDeleted {
 				return
 			}
+		} else {
+			pred = tmp
 		}
 	}
 	return

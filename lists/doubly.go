@@ -26,14 +26,18 @@ func NewDoubly() *Doubly {
 	}
 }
 
-// Size of the list O(1)
+// Size of the list
+//
+// Runtime: O(1)
 func (d *Doubly) Size() int {
 	d.rwLock.RLock()
 	defer d.rwLock.RUnlock()
 	return d.size
 }
 
-// IsEmpty true if the list contains no items O(1)
+// IsEmpty true if the list contains no items
+//
+// Runtime: O(1)
 func (d *Doubly) IsEmpty() bool {
 	d.rwLock.RLock()
 	defer d.rwLock.RUnlock()
