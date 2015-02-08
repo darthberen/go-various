@@ -12,7 +12,7 @@ type Singly struct {
 
 type singlyNode struct {
 	Next *singlyNode
-	Data string
+	Data interface{}
 }
 
 // NewSingly creates a new empty singly-linked list
@@ -32,7 +32,7 @@ func (s *Singly) Size() int64 {
 	return s.size
 }
 
-// IsEmpty true if the singly-linked list contains no items O(1)
+// IsEmpty true if the list contains no items O(1)
 func (s *Singly) IsEmpty() bool {
 	s.rwLock.RLock()
 	defer s.rwLock.RUnlock()
@@ -40,7 +40,7 @@ func (s *Singly) IsEmpty() bool {
 }
 
 // PushHead add data to the front of the list O(1)
-func (s *Singly) PushHead(data string) {
+func (s *Singly) PushHead(data interface{}) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
 	if s.head == nil {
@@ -54,7 +54,7 @@ func (s *Singly) PushHead(data string) {
 }
 
 // PushTail add data to the back of the list O(1)
-func (s *Singly) PushTail(data string) {
+func (s *Singly) PushTail(data interface{}) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
 	if s.head == nil {
@@ -68,7 +68,7 @@ func (s *Singly) PushTail(data string) {
 }
 
 // PopHead remove data from the front of the list O(1)
-func (s *Singly) PopHead() (data string, err error) {
+func (s *Singly) PopHead() (data interface{}, err error) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
 	if s.head == nil {
@@ -76,12 +76,15 @@ func (s *Singly) PopHead() (data string, err error) {
 	}
 	data = s.head.Data
 	s.head = s.head.Next
+	if s.head == nil {
+		s.tail = nil
+	}
 	s.size--
 	return
 }
 
 // PopTail remove data from the back of the list O(n)
-func (s *Singly) PopTail() (data string, err error) {
+func (s *Singly) PopTail() (data interface{}, err error) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
 	var tmp *singlyNode
@@ -100,57 +103,50 @@ func (s *Singly) PopTail() (data string, err error) {
 	return
 }
 
-// Contains data in the list, returns a ItemNotFoundError if the item
-// does not exist O(n)
-func (s *Singly) Contains(data string) (bool, error) {
+// Contains returns true if list contains any data where the comparison
+// function returns true.  Moves from the head of the list to the tail.
+//
+// Runtime: O(n)
+func (s *Singly) Contains(comparison func(data interface{}) (exists bool)) bool {
 	s.rwLock.RLock()
 	defer s.rwLock.RUnlock()
 	for tmp := s.head; tmp != nil; tmp = tmp.Next {
-		if tmp.Data == data {
-			return true, nil
+		if comparison(tmp.Data) {
+			return true
 		}
 	}
-	return false, ItemNotFoundError(data)
+	return false
 }
 
-// Delete data in the list, returns a ItemNotFoundError if the item
-// does not exist O(n)
-func (s *Singly) Delete(data string) error {
+// Delete data in the list based on the provided comparison function.  Moves from
+// the head of list to the tail.  If the
+// comparison function returns true for any item in the list then that item is
+// deleted.  Returns the number of items that were deleted.
+//
+// Runtime: O(n)
+func (s *Singly) Delete(comparison func(data interface{}) (shouldDelete bool)) (numDeleted int64) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
 	if s.head == nil {
-		return ItemNotFoundError(data)
+		return
 	}
-	if s.head.Data == data {
+	for comparison(s.head.Data) {
+		numDeleted++
+		s.size--
 		if s.head == s.tail {
 			s.head, s.tail = nil, nil
-			s.size--
-			return nil
+			return
 		}
 		s.head = s.head.Next
-		s.size--
-		return nil
 	}
 	for pred, tmp := s.head, s.head.Next; tmp != nil; pred, tmp = tmp, tmp.Next {
-		if tmp.Data == data {
+		if comparison(tmp.Data) {
 			pred.Next = tmp.Next
 			if pred.Next == nil {
 				s.tail = pred
 			}
 			s.size--
-			return nil
-		}
-	}
-	return ItemNotFoundError(data)
-}
-
-func (s *Singly) String() (str string) {
-	s.rwLock.RLock()
-	defer s.rwLock.RUnlock()
-	for tmp := s.head; tmp != nil; tmp = tmp.Next {
-		str += tmp.Data
-		if tmp.Next != nil {
-			str += ", "
+			numDeleted++
 		}
 	}
 	return
