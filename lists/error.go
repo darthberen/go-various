@@ -9,10 +9,3 @@ type EmptyListError string
 func (e EmptyListError) Error() string {
 	return fmt.Sprintf("lists: %s", e)
 }
-
-// ItemNotFoundError indicates that the data is not contained within the list
-type ItemNotFoundError string
-
-func (e ItemNotFoundError) Error() string {
-	return fmt.Sprintf("lists: data '%s' could not be found", e)
-}
