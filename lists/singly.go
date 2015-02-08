@@ -6,7 +6,7 @@ import "sync"
 type Singly struct {
 	head   *singlyNode
 	tail   *singlyNode
-	size   int64
+	size   int
 	rwLock *sync.RWMutex
 }
 
@@ -25,21 +25,27 @@ func NewSingly() *Singly {
 	}
 }
 
-// Size of the list O(1)
-func (s *Singly) Size() int64 {
+// Size of the list
+//
+// Runtime: O(1)
+func (s *Singly) Size() int {
 	s.rwLock.RLock()
 	defer s.rwLock.RUnlock()
 	return s.size
 }
 
-// IsEmpty true if the list contains no items O(1)
+// IsEmpty returns true if the list contains no items
+//
+// Runtime: O(1)
 func (s *Singly) IsEmpty() bool {
 	s.rwLock.RLock()
 	defer s.rwLock.RUnlock()
 	return s.head == nil
 }
 
-// PushHead add data to the front of the list O(1)
+// PushHead adds data to the front of the list
+//
+// Runtime: O(1)
 func (s *Singly) PushHead(data interface{}) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
@@ -53,7 +59,9 @@ func (s *Singly) PushHead(data interface{}) {
 	s.size++
 }
 
-// PushTail add data to the back of the list O(1)
+// PushTail adds data to the back of the list
+//
+// Runtime: O(1)
 func (s *Singly) PushTail(data interface{}) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
@@ -67,7 +75,10 @@ func (s *Singly) PushTail(data interface{}) {
 	s.size++
 }
 
-// PopHead remove data from the front of the list O(1)
+// PopHead removes data from the front of the list.  Returns an
+// EmptyListError if there are no items in the list.
+//
+// Runtime: O(1)
 func (s *Singly) PopHead() (data interface{}, err error) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
@@ -83,7 +94,10 @@ func (s *Singly) PopHead() (data interface{}, err error) {
 	return
 }
 
-// PopTail remove data from the back of the list O(n)
+// PopTail removes data from the back of the list.  Returns an
+// EmptyListError if there are no items in the list.
+//
+// Runtime: O(n)
 func (s *Singly) PopTail() (data interface{}, err error) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
@@ -118,13 +132,14 @@ func (s *Singly) Contains(comparison func(data interface{}) (exists bool)) bool 
 	return false
 }
 
-// Delete data in the list based on the provided comparison function.  Moves from
+// Delete numItems data in the list based on the provided comparison function.  Moves from
 // the head of list to the tail.  If the
 // comparison function returns true for any item in the list then that item is
-// deleted.  Returns the number of items that were deleted.
+// deleted.  Returns the number of items that were deleted.  If numItems is <= 0 then all
+// data in the list is scanned.
 //
 // Runtime: O(n)
-func (s *Singly) Delete(comparison func(data interface{}) (shouldDelete bool)) (numDeleted int64) {
+func (s *Singly) Delete(numItems int, comparison func(data interface{}) (shouldDelete bool)) (numDeleted int) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
 	if s.head == nil {
@@ -138,6 +153,9 @@ func (s *Singly) Delete(comparison func(data interface{}) (shouldDelete bool)) (
 			return
 		}
 		s.head = s.head.Next
+		if numItems == numDeleted {
+			return
+		}
 	}
 	for pred, tmp := s.head, s.head.Next; tmp != nil; pred, tmp = tmp, tmp.Next {
 		if comparison(tmp.Data) {
@@ -147,6 +165,9 @@ func (s *Singly) Delete(comparison func(data interface{}) (shouldDelete bool)) (
 			}
 			s.size--
 			numDeleted++
+			if numItems == numDeleted {
+				return
+			}
 		}
 	}
 	return

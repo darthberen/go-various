@@ -103,24 +103,36 @@ func (suite *SinglyTestSuite) TestSinglyContains() {
 
 func (suite *SinglyTestSuite) TestSinglyDelete() {
 	list := NewSingly()
-	numDeleted := list.Delete(suite.findExact(""))
+	numDeleted := list.Delete(0, suite.findExact(""))
 	assert.Equal(suite.T(), 0, numDeleted, "expected 0 items to be deleted from an empty list")
 	for _, item := range suite.data {
 		list.PushHead(item)
 	}
-	numDeleted = list.Delete(suite.findExact("nonexistent data"))
+	numDeleted = list.Delete(0, suite.findExact("nonexistent data"))
 	assert.Equal(suite.T(), 0, numDeleted, "expected 0 items to be deleted")
-	numDeleted = list.Delete(suite.findExact(suite.data[len(suite.data)-1]))
+	numDeleted = list.Delete(0, suite.findExact(suite.data[len(suite.data)-1]))
 	assert.Equal(suite.T(), 1, numDeleted, "list should delete head data[%d] '%s'", len(suite.data)-1, suite.data[len(suite.data)-1])
 	assert.Exactly(suite.T(), suite.data[len(suite.data)-2], list.head.Data, "list head data[%d] is incorrect", len(suite.data)-2)
 
-	numDeleted = list.Delete(suite.findExact(suite.data[0]))
+	numDeleted = list.Delete(0, suite.findExact(suite.data[0]))
 	assert.Equal(suite.T(), 1, numDeleted, "list should delete tail data[%d] '%s'", 0, suite.data[0])
 	assert.Exactly(suite.T(), suite.data[1], list.tail.Data, "list tail data[%d] is incorrect", len(suite.data)-2)
 	for i := 1; i < len(suite.data)-1; i++ {
-		numDeleted = list.Delete(suite.findExact(suite.data[i]))
+		numDeleted = list.Delete(0, suite.findExact(suite.data[i]))
 		assert.Equal(suite.T(), 1, numDeleted, "list should delete data[%d] '%s'", i, suite.data[i])
 	}
+
+	for i := 0; i < 10; i++ {
+		list.PushHead(i)
+	}
+	numDeleted = list.Delete(1, func(data interface{}) bool { return true })
+	assert.Equal(suite.T(), 1, numDeleted, "list should delete 1 item")
+	assert.Equal(suite.T(), 9, list.Size(), "list should have 9 items")
+	numDeleted = list.Delete(10, func(data interface{}) bool { return data.(int) > 0 })
+	assert.Equal(suite.T(), 8, numDeleted, "list should delete 8 items")
+	assert.Equal(suite.T(), 1, list.Size(), "list should have 1 item")
+	assert.Equal(suite.T(), 0, list.head.Data)
+	assert.Exactly(suite.T(), list.head, list.tail)
 }
 
 func (suite *SinglyTestSuite) TestSinglySize() {
@@ -151,7 +163,7 @@ func (suite *SinglyTestSuite) TestSinglySize() {
 		list.PushHead(item)
 	}
 	for i := len(suite.data) - 1; i >= 0; i-- {
-		list.Delete(suite.findExact(suite.data[i]))
+		list.Delete(0, suite.findExact(suite.data[i]))
 		size := list.Size()
 		assert.Equal(suite.T(), i, size, "Delete: expected list to be of size %d", i)
 	}
@@ -170,6 +182,6 @@ func (suite *SinglyTestSuite) TestSinglyIsEmpty() {
 	list.PopTail()
 	assert.True(suite.T(), list.IsEmpty(), "PopTail")
 	list.PushTail(data)
-	list.Delete(suite.findExact(data))
+	list.Delete(0, suite.findExact(data))
 	assert.True(suite.T(), list.IsEmpty(), "Delete")
 }
