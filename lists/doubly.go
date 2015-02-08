@@ -132,3 +132,40 @@ func (d *Doubly) Contains(comparison func(data interface{}) (exists bool)) bool 
 	}
 	return false
 }
+
+// Delete numItems data in the list based on the provided comparison function.
+// Moves from the head of list to the tail.  If the
+// comparison function returns true for any item in the list then that item is
+// deleted.  Returns the number of items that were deleted.  If numItems is <= 0
+// then all data in the list is scanned.
+//
+// Runtime: O(n)
+func (d *Doubly) Delete(numItems int, comparison func(data interface{}) (shouldDelete bool)) (numDeleted int) {
+	d.rwLock.Lock()
+	defer d.rwLock.Unlock()
+	if d.head == nil {
+		return
+	}
+	for tmp := d.head; tmp != nil; tmp = tmp.Next {
+		if comparison(tmp.Data) {
+			pred := tmp.Prev
+			succ := tmp.Next
+			if succ == nil {
+				d.tail = pred
+			} else {
+				succ.Prev = pred
+			}
+			if pred == nil {
+				d.head = succ
+			} else {
+				pred.Next = succ
+			}
+			d.size--
+			numDeleted++
+			if numItems == numDeleted {
+				return
+			}
+		}
+	}
+	return
+}

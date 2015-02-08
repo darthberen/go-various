@@ -100,3 +100,92 @@ func (suite *DoublyTestSuite) TestContains() {
 		assert.True(suite.T(), contains, "list item data[%d] is missing", i)
 	}
 }
+
+func (suite *DoublyTestSuite) TestDelete() {
+	list := NewDoubly()
+	numDeleted := list.Delete(0, suite.findExact(""))
+	assert.Equal(suite.T(), 0, numDeleted, "expected 0 items to be deleted from an empty list")
+	for _, item := range suite.data {
+		list.PushHead(item)
+	}
+	numDeleted = list.Delete(0, suite.findExact("nonexistent data"))
+	assert.Equal(suite.T(), 0, numDeleted, "expected 0 items to be deleted")
+	numDeleted = list.Delete(0, suite.findExact(suite.data[len(suite.data)-1]))
+	assert.Equal(suite.T(), 1, numDeleted, "list should delete head data[%d] '%s'", len(suite.data)-1, suite.data[len(suite.data)-1])
+	assert.Exactly(suite.T(), suite.data[len(suite.data)-2], list.head.Data, "list head data[%d] is incorrect", len(suite.data)-2)
+
+	numDeleted = list.Delete(0, suite.findExact(suite.data[0]))
+	assert.Equal(suite.T(), 1, numDeleted, "list should delete tail data[%d] '%s'", 0, suite.data[0])
+	assert.Exactly(suite.T(), suite.data[1], list.tail.Data, "list tail data[%d] is incorrect", len(suite.data)-2)
+	for i := 1; i < len(suite.data)-1; i++ {
+		numDeleted = list.Delete(0, suite.findExact(suite.data[i]))
+		assert.Equal(suite.T(), 1, numDeleted, "list should delete data[%d] '%s'", i, suite.data[i])
+	}
+
+	for i := 0; i < 10; i++ {
+		list.PushHead(i)
+	}
+	numDeleted = list.Delete(1, func(data interface{}) bool { return true })
+	assert.Equal(suite.T(), 1, numDeleted, "list should delete 1 item")
+	assert.Equal(suite.T(), 9, list.Size(), "list should have 9 items")
+	numDeleted = list.Delete(5, func(data interface{}) bool { return data.(int) < 8 })
+	assert.Equal(suite.T(), 5, numDeleted, "list should delete 5 items")
+	assert.Equal(suite.T(), 4, list.Size(), "list should have 4 items")
+
+	numDeleted = list.Delete(5, func(data interface{}) bool { return data.(int) > 0 })
+	assert.Equal(suite.T(), 3, numDeleted, "list should delete 3 items")
+	assert.Equal(suite.T(), 1, list.Size(), "list should have 1 item")
+	assert.Equal(suite.T(), 0, list.head.Data)
+	assert.Exactly(suite.T(), list.head, list.tail)
+}
+
+func (suite *DoublyTestSuite) TestSize() {
+	list := NewDoubly()
+	size := list.Size()
+	assert.Equal(suite.T(), 0, size, "expected list to be of size 0")
+	for i, item := range suite.data {
+		list.PushHead(item)
+		size := list.Size()
+		assert.Equal(suite.T(), i+1, size, "PushHead: expected list to be of size %d", i)
+	}
+	for i := len(suite.data) - 1; i >= 0; i-- {
+		list.PopHead()
+		size := list.Size()
+		assert.Equal(suite.T(), i, size, "PopHead: expected list to be of size %d", i)
+	}
+	for i, item := range suite.data {
+		list.PushTail(item)
+		size := list.Size()
+		assert.Equal(suite.T(), i+1, size, "PushTail: expected list to be of size %d", i)
+	}
+	for i := len(suite.data) - 1; i >= 0; i-- {
+		list.PopTail()
+		size := list.Size()
+		assert.Equal(suite.T(), i, size, "PopTail: expected list to be of size %d", i)
+	}
+	for _, item := range suite.data {
+		list.PushHead(item)
+	}
+	for i := len(suite.data) - 1; i >= 0; i-- {
+		list.Delete(0, suite.findExact(suite.data[i]))
+		size := list.Size()
+		assert.Equal(suite.T(), i, size, "Delete: expected list to be of size %d", i)
+	}
+}
+
+func (suite *DoublyTestSuite) TestIsEmpty() {
+	data := "data1"
+	list := NewDoubly()
+	assert.True(suite.T(), list.IsEmpty(), "initialized")
+	list.PushHead(data)
+	assert.False(suite.T(), list.IsEmpty(), "PushHead")
+	list.PopHead()
+	assert.True(suite.T(), list.IsEmpty(), "PopHead")
+	list.PushTail(data)
+	assert.False(suite.T(), list.IsEmpty(), "PushTail")
+	list.PopTail()
+	assert.True(suite.T(), list.IsEmpty(), "PopTail")
+	list.PushTail(data)
+	list.Delete(0, suite.findExact(data))
+	assert.True(suite.T(), list.IsEmpty(), "Delete")
+}
