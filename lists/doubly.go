@@ -6,14 +6,14 @@ import "sync"
 type Doubly struct {
 	head   *doublyNode
 	tail   *doublyNode
-	size   int64
+	size   int
 	rwLock *sync.RWMutex
 }
 
 type doublyNode struct {
 	Next *doublyNode
 	Prev *doublyNode
-	Data string
+	Data interface{}
 }
 
 // NewDoubly creates a new empty doubly-linked list
@@ -27,7 +27,7 @@ func NewDoubly() *Doubly {
 }
 
 // Size of the list O(1)
-func (d *Doubly) Size() int64 {
+func (d *Doubly) Size() int {
 	d.rwLock.RLock()
 	defer d.rwLock.RUnlock()
 	return d.size
@@ -40,8 +40,10 @@ func (d *Doubly) IsEmpty() bool {
 	return d.head == nil
 }
 
-// PushHead add data to the front of the list O(1)
-func (d *Doubly) PushHead(data string) {
+// PushHead adds data to the front of the list
+//
+// Runtime: O(1)
+func (d *Doubly) PushHead(data interface{}) {
 	d.rwLock.Lock()
 	defer d.rwLock.Unlock()
 	if d.head == nil {
@@ -54,8 +56,10 @@ func (d *Doubly) PushHead(data string) {
 	d.size++
 }
 
-// PushTail add data to the back of the list O(1)
-func (d *Doubly) PushTail(data string) {
+// PushTail adds data to the back of the list
+//
+// Runtime: O(1)
+func (d *Doubly) PushTail(data interface{}) {
 	d.rwLock.Lock()
 	defer d.rwLock.Unlock()
 	if d.head == nil {
@@ -68,8 +72,11 @@ func (d *Doubly) PushTail(data string) {
 	d.size++
 }
 
-// PopHead remove data from the front of the list O(1)
-func (d *Doubly) PopHead() (data string, err error) {
+// PopHead removes data from the front of the list.  Returns an
+// EmptyListError if there are no items in the list.
+//
+// Runtime: O(1)
+func (d *Doubly) PopHead() (data interface{}, err error) {
 	d.rwLock.Lock()
 	defer d.rwLock.Unlock()
 	if d.head == nil {
@@ -86,8 +93,11 @@ func (d *Doubly) PopHead() (data string, err error) {
 	return
 }
 
-// PopTail remove data from the back of the list O(1)
-func (d *Doubly) PopTail() (data string, err error) {
+// PopTail removes data from the back of the list.  Returns an
+// EmptyListError if there are no items in the list.
+//
+// Runtime: O(1)
+func (d *Doubly) PopTail() (data interface{}, err error) {
 	d.rwLock.Lock()
 	defer d.rwLock.Unlock()
 	if d.head == nil {
@@ -101,17 +111,5 @@ func (d *Doubly) PopTail() (data string, err error) {
 		d.tail.Next = nil
 	}
 	d.size--
-	return
-}
-
-func (d *Doubly) String() (str string) {
-	d.rwLock.RLock()
-	defer d.rwLock.RUnlock()
-	for tmp := d.head; tmp != nil; tmp = tmp.Next {
-		str += tmp.Data
-		if tmp.Next != nil {
-			str += ", "
-		}
-	}
 	return
 }
