@@ -36,7 +36,7 @@ func (suite *SinglyTestSuite) TestNewSingly() {
 	assert.Equal(suite.T(), 0, list.size)
 }
 
-func (suite *SinglyTestSuite) TestSinglyPushHead() {
+func (suite *SinglyTestSuite) TestPushHead() {
 	list := NewSingly()
 	for i, item := range suite.data {
 		list.PushHead(item)
@@ -47,7 +47,7 @@ func (suite *SinglyTestSuite) TestSinglyPushHead() {
 	}
 }
 
-func (suite *SinglyTestSuite) TestSinglyPushTail() {
+func (suite *SinglyTestSuite) TestPushTail() {
 	list := NewSingly()
 	for i, item := range suite.data {
 		list.PushTail(item)
@@ -58,7 +58,7 @@ func (suite *SinglyTestSuite) TestSinglyPushTail() {
 	}
 }
 
-func (suite *SinglyTestSuite) TestSinglyPopHead() {
+func (suite *SinglyTestSuite) TestPopHead() {
 	list := NewSingly()
 	_, err := list.PopHead()
 	assert.Exactly(suite.T(), EmptyListError("can't remove an item from an empty list"), err, "wanted EmptyListError")
@@ -72,7 +72,7 @@ func (suite *SinglyTestSuite) TestSinglyPopHead() {
 	}
 }
 
-func (suite *SinglyTestSuite) TestSinglyPopTail() {
+func (suite *SinglyTestSuite) TestPopTail() {
 	list := NewSingly()
 	_, err := list.PopTail()
 	assert.Exactly(suite.T(), EmptyListError("can't remove an item from an empty list"), err, "wanted EmptyListError")
@@ -86,7 +86,7 @@ func (suite *SinglyTestSuite) TestSinglyPopTail() {
 	}
 }
 
-func (suite *SinglyTestSuite) TestSinglyContains() {
+func (suite *SinglyTestSuite) TestContains() {
 	list := NewSingly()
 	contains := list.Contains(suite.findExact(suite.data[0]))
 	assert.False(suite.T(), contains, "empty list should not contain anything")
@@ -97,11 +97,11 @@ func (suite *SinglyTestSuite) TestSinglyContains() {
 	assert.False(suite.T(), contains)
 	for i := 0; i < len(suite.data); i++ {
 		contains = list.Contains(suite.findExact(suite.data[i]))
-		assert.True(suite.T(), contains, "list item data[%d] is incorrect", i)
+		assert.True(suite.T(), contains, "list item data[%d] is missing", i)
 	}
 }
 
-func (suite *SinglyTestSuite) TestSinglyDelete() {
+func (suite *SinglyTestSuite) TestDelete() {
 	list := NewSingly()
 	numDeleted := list.Delete(0, suite.findExact(""))
 	assert.Equal(suite.T(), 0, numDeleted, "expected 0 items to be deleted from an empty list")
@@ -139,7 +139,7 @@ func (suite *SinglyTestSuite) TestSinglyDelete() {
 	assert.Exactly(suite.T(), list.head, list.tail)
 }
 
-func (suite *SinglyTestSuite) TestSinglySize() {
+func (suite *SinglyTestSuite) TestSize() {
 	list := NewSingly()
 	size := list.Size()
 	assert.Equal(suite.T(), 0, size, "expected list to be of size 0")
@@ -173,7 +173,7 @@ func (suite *SinglyTestSuite) TestSinglySize() {
 	}
 }
 
-func (suite *SinglyTestSuite) TestSinglyIsEmpty() {
+func (suite *SinglyTestSuite) TestIsEmpty() {
 	data := "data1"
 	list := NewSingly()
 	assert.True(suite.T(), list.IsEmpty(), "initialized")

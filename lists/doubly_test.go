@@ -19,9 +19,24 @@ func TestDoublyTestSuite(t *testing.T) {
 
 func (suite *DoublyTestSuite) SetupTest() {
 	suite.data = []string{"data1", "data2", "something", "hello there world", "another thing"}
+	suite.findExact = func(item string) func(interface{}) bool {
+		return func(data interface{}) bool {
+			if data.(string) == item {
+				return true
+			}
+			return false
+		}
+	}
 }
 
-func (suite *DoublyTestSuite) TestDoublyPushHead() {
+func (suite *DoublyTestSuite) TestNewDoubly() {
+	list := NewDoubly()
+	assert.Nil(suite.T(), list.head)
+	assert.Nil(suite.T(), list.tail)
+	assert.Equal(suite.T(), 0, list.size)
+}
+
+func (suite *DoublyTestSuite) TestPushHead() {
 	list := NewDoubly()
 	for i, item := range suite.data {
 		list.PushHead(item)
@@ -32,7 +47,7 @@ func (suite *DoublyTestSuite) TestDoublyPushHead() {
 	}
 }
 
-func (suite *DoublyTestSuite) TestDoublyPushTail() {
+func (suite *DoublyTestSuite) TestPushTail() {
 	list := NewDoubly()
 	for i, item := range suite.data {
 		list.PushTail(item)
@@ -43,7 +58,7 @@ func (suite *DoublyTestSuite) TestDoublyPushTail() {
 	}
 }
 
-func (suite *DoublyTestSuite) TestDoublyPopHead() {
+func (suite *DoublyTestSuite) TestPopHead() {
 	list := NewDoubly()
 	_, err := list.PopHead()
 	assert.Exactly(suite.T(), EmptyListError("can't remove an item from an empty list"), err, "wanted EmptyListError")
@@ -57,7 +72,7 @@ func (suite *DoublyTestSuite) TestDoublyPopHead() {
 	}
 }
 
-func (suite *DoublyTestSuite) TestDoublyPopTail() {
+func (suite *DoublyTestSuite) TestPopTail() {
 	list := NewDoubly()
 	_, err := list.PopTail()
 	assert.Exactly(suite.T(), EmptyListError("can't remove an item from an empty list"), err, "wanted EmptyListError")
@@ -68,5 +83,20 @@ func (suite *DoublyTestSuite) TestDoublyPopTail() {
 		item, err := list.PopTail()
 		assert.NoError(suite.T(), err, "list should contain items")
 		assert.Exactly(suite.T(), suite.data[i], item, "list item data[%d] is incorrect", i)
+	}
+}
+
+func (suite *DoublyTestSuite) TestContains() {
+	list := NewDoubly()
+	contains := list.Contains(suite.findExact(suite.data[0]))
+	assert.False(suite.T(), contains, "empty list should not contain anything")
+	for _, item := range suite.data {
+		list.PushHead(item)
+	}
+	contains = list.Contains(suite.findExact("nonexistent data"))
+	assert.False(suite.T(), contains)
+	for i := 0; i < len(suite.data); i++ {
+		contains = list.Contains(suite.findExact(suite.data[i]))
+		assert.True(suite.T(), contains, "list item data[%d] is missing", i)
 	}
 }

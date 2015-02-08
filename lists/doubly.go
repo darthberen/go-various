@@ -117,3 +117,18 @@ func (d *Doubly) PopTail() (data interface{}, err error) {
 	d.size--
 	return
 }
+
+// Contains returns true if list contains any data where the comparison
+// function returns true.  Moves from the head of the list to the tail.
+//
+// Runtime: O(n)
+func (d *Doubly) Contains(comparison func(data interface{}) (exists bool)) bool {
+	d.rwLock.RLock()
+	defer d.rwLock.RUnlock()
+	for tmp := d.head; tmp != nil; tmp = tmp.Next {
+		if comparison(tmp.Data) {
+			return true
+		}
+	}
+	return false
+}
